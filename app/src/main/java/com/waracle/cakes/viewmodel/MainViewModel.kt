@@ -4,8 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.waracle.cakes.model.Cakes
 import com.waracle.cakes.repository.MainRepository
+import com.waracle.cakes.retrofit.NoConnectivityException
 import retrofit2.Call
-
 import retrofit2.Callback
 import retrofit2.Response
 
@@ -13,6 +13,7 @@ class MainViewModel constructor(val repository: MainRepository) : ViewModel() {
 
     var cakeList = MutableLiveData<List<Cakes>>()
     var errorMessage = MutableLiveData<String>()
+    val nerworkErrorMessage: String = "No Internet Connection"
 
     fun getAllCakes() {
         val response = repository.getAllCakes()
@@ -22,7 +23,12 @@ class MainViewModel constructor(val repository: MainRepository) : ViewModel() {
             }
 
             override fun onFailure(call: Call<List<Cakes>>, t: Throwable) {
-                errorMessage.postValue(t.message)
+                if (t is NoConnectivityException) {
+                    // show No Connectivity message to user or do whatever you want.
+                    errorMessage.postValue(nerworkErrorMessage)
+                } else {
+                    errorMessage.postValue(t.message)
+                }
             }
         })
     }
